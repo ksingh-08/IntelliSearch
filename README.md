@@ -1,215 +1,251 @@
-# Second Brain  
-# *Local RAG Agent* <mark>by Henry Daum</mark>
-
-**If you find any errors, please let me know.**
-
-[Second Brain Official Website](https://www.henrydaum.site/)
-
-[The New and Updated Version (6x faster!)](https://github.com/henrydaum/2nd-Brain)
-
----
-
-## Screenshots & GIFs
-
-<img width="1134" height="826" alt="Screenshot 2025-09-19 123225" src="https://github.com/user-attachments/assets/805f5a0d-520a-496e-8c45-8ef1fb975e61" />
-
-https://github.com/user-attachments/assets/ca803713-4199-4403-91ac-8b64056ae790
-
-https://github.com/user-attachments/assets/38dd0998-328a-4164-8b5e-9ec1a52dcb84
+# IntelliSearch AI - Enterprise Knowledge Base with AWS Bedrock
+## Intelligent RAG System for Enhanced Learning and Productivity
 
 ---
 
 ## Features
 
-- Semantic search: searches based on deep semantic meaning.
-- Lexical search: finds a needle in a haystack using keywords.
-- Supported files: .txt, .pdf, .docx, .gdoc, .png, .jpg, .jpeg, .gif, .webp  
-- Multimodal in three ways:
-  * Can embed and search for both text and images.
-  * Can attach text documents and images, and use them to search.
-  * Can use AI language models with vision.
-- Optional AI Mode:
-  * **LLM Integration**: Supports local models via LM Studio and cloud models, like GPT-5, via OpenAI.  
-  * **Retrieval-Augmented Generation (RAG)**: Uses search results to provide high-quality AI responses rooted in the knowledge-base.
-  * The AI Mode is entirely optional; a search can be run without AI.
-- Sync 100,000+ files.
-- Security and privacy: local search ensures no data is sent to the internet.
-- Works with Google Drive.
-- Works offline with downloaded models.
-- Open source: all the code is right here.
+- **AWS Bedrock Integration**: Enterprise-grade embeddings using Amazon Titan and Cohere models
+- **Claude 3.5 AI Models**: Advanced language understanding via AWS Bedrock (Haiku, Sonnet, Opus)
+- **Semantic Search**: Searches based on deep semantic meaning using vector embeddings
+- **Lexical Search**: Finds exact keywords using BM25 algorithm
+- **Hybrid Search Architecture**: Combines semantic and lexical approaches with MMR reranking
+- **Multimodal Support**: 
+  * Embed and search both text and images
+  * Attach documents and images for contextual search
+  * Vision-enabled AI models for image understanding
+- **Multiple AI Backends**:
+  * **AWS Bedrock**: Claude 3.5, Titan, Llama 3, Mistral models
+  * **Local Models**: LM Studio for private, offline operation
+  * **OpenAI**: GPT models via API
+- **RAG (Retrieval-Augmented Generation)**: AI responses grounded in your knowledge base
+- **Supported Files**: .txt, .pdf, .docx, .gdoc, .png, .jpg, .jpeg, .gif, .webp
+- **Scalable**: Sync 100,000+ files efficiently
+- **Flexible Deployment**: Local embeddings or AWS Bedrock cloud processing
+- **Privacy Options**: Local-only mode or secure AWS VPC deployment
+- **Google Drive Integration**: Sync and search Google Docs
+- **Offline Capable**: Works with downloaded models when internet unavailable
 
 ---
 
-## Infographic of How it Works
-<img width="1206" height="1275" alt="Second Brain Search Flowchart Infographic" src="https://github.com/user-attachments/assets/efdb2226-32c0-4b07-aed7-73aef4188ee1" />
+## Architecture
 
----
+### System Overview
 
-## How It Works  
-### *Backend Code*  
-<mark>SecondBrainBackend.py</mark>
+```
+Documents + Images
+        |
+        v
+Text Chunking & Processing
+        |
+        v
+Embedding Generation (AWS Bedrock Titan / Local Models)
+        |
+        v
+ChromaDB Vector Store (Local)
+        |
+        v
+Hybrid Search (Semantic + Lexical BM25)
+        |
+        v
+MMR Reranking (Relevance + Diversity)
+        |
+        v
+AI Synthesis (AWS Bedrock Claude / OpenAI / Local)
+        |
+        v
+Results + Insights
+```
 
-This file handles two things: syncing the directory and performing searches. 
+## How It Works
 
-**Syncing:** Scans the target directory, detects new, updated, or deleted files. Extracts text from files and splits it into manageable chunks, while also batching images together for the sake of speed. Converts text chunks and images into vector embeddings using sentence-transformer models. Stores embeddings in a persistent ChromaDB vector database. To enable lexical search, image captions are created and stored along with image embeddings. A lexical index of both text documents and image captions is created using BM25 for lexical search.
+### Backend (SecondBrainBackend.py)
 
-**Retrieval**: Performs both a semantic and lexical search, then combines the outputs, reranks all results using Maximal Marginal Relevance (MMR), takes the top N outputs, and finally filters for relevance using AI (last step optional).
+**Syncing:** Scans directories for new, updated, or deleted files. Extracts text and splits into chunks. Generates vector embeddings using AWS Bedrock Titan models or local SentenceTransformers. Stores embeddings in ChromaDB vector database. Creates BM25 lexical index for keyword search. Generates image captions for multimodal search.
 
-### *Frontend Code*  
-<mark>SecondBrainFrontend.py</mark>
+**Retrieval:** Executes hybrid search combining semantic (vector similarity) and lexical (BM25 keyword) approaches. Reranks results using Maximal Marginal Relevance (MMR) for optimal relevance and diversity. Optional AI filtering and synthesis using AWS Bedrock Claude models.
 
-The frontend code controls the user interface for the application. It controls threading for non-blocking backend operations, prompting patterns for the AI, and logging functions. Manages text and image attachments to construct complex prompts for the LLM. Allows the user to send messages in a chat-like format. Provides an interactive settings page. Performs many different functions simultaneously, and orchestrates blocking and re-enabling different buttons at different times to prevent crashes. *Looks good, too, if I may say so myself.*
+### Frontend (SecondBrainFrontend.py)
 
-Uniquely, image and text results can be attached in order to perform continous searches, like web-surfing but through your own filebase. There is no other experience exactly like it. Simply click on an image result or the four squares by a text result and then click "attach result." Other similar amenities are available in the app.
+Modern UI built with Flet framework. Manages threading for non-blocking operations. Handles AWS Bedrock, OpenAI, and local LLM integrations. Supports text and image attachments for contextual queries. Interactive settings for model selection and configuration. Real-time streaming of AI responses. Attachment system for continuous, context-aware searches.
 
-### *Settings*  
-<mark>config.json</mark>
+### Configuration Files
 
-This file is now created automatically by Second Brain and controls various features. It is changed by going into the Settings page, changing a setting, and then clicking `Save & Close`, which reloads the backend to implement the changes.
-
-### *Google Drive Authentication*  
-<mark>credentials.json</mark>
-
-This file must be added (see below) if using Google Drive (optional), as it allows the syncing of Google Doc (.gdoc) files.
-
-### *Image Labels*
-<mark>image_labels.csv</mark>
-
-This CSV is used as a pool for possible image labels. The image labels are chosen based on how close the image embedding is to each label embedding (a categorization task). It was constructed based on Google's Open Images dataset for object identification.
-
-### *Image Labels*
-<mark>icon.ico</mark>
-
-(Optional) The Second Brain logo, used as the window icon.
-
-### *Hotkey to Run Second Brain*
-<mark>SecondBrainHotkey.ahk</mark>
-*If you want, you can make a hotkey (I do ctrl+j) using AutoHotkey that automatically runs SecondBrainFrontend.py when you are anywhere on your computer. This makes it very convenient. To do this, you'll need to download AutoHotkey itself, and edit it so that the path points to where your SecondBrain folder is. To make the hotkey active when you start your computer, place the script inside your startup files, which you can find (on Windows) using Win+R and then typing `shell:startup`.*
+- **config.json**: Auto-generated configuration for AWS Bedrock settings, model selection, and search parameters
+- **AWSBedrockIntegration.py**: AWS Bedrock wrapper classes for embeddings and LLMs
+- **credentials.json**: (Optional) Google Drive OAuth credentials
+- **image_labels.csv**: Image classification labels from Google Open Images dataset
+- **icon.ico**: Application icon
 
 ---
 
 ## Getting Started
 
 ### 1. Prerequisites
-Before running the application, ensure you have the following:
-   - Python: Second Brain requires Python 3.9 or higher.
-   - LM Studio: To use AI Mode with a local LLM, you must download and install LM Studio with a .gguf model, ideally with vision capabilities (unsloth/gemma-3-4b-it works well, but any model may be used).
-   - Open AI API: To use a model from the OpenAI API, make sure you have an API key from platform.openai.com with sufficient funds.
-   - Dependencies: Install the required Python libraries (see below - dependencies) using pip.
-   - System requirements: The search engine can be used with GPU or CPU. It will automatically detect if a GPU exists and use it if available. Different text and image embedding models use different amounts of memory, and can be configured. For example, the default models use 2GB of VRAM/RAM.
-### 2. Installation
-Download ```SecondBrainBackend```, ```SecondBrainFrontend```, ```icon.ico```, and ```image_labels.csv``` from this repository. Only these four files are needed. Not bad, right? Place them in a folder.
-### 3. Configuration
-On the welcome screen, or in the settings, update the <mark>Sync Directory</mark> to point to the folder you want to use as your knowledge base.
+- Python 3.9 or higher
+- AWS Account with Bedrock access (for AWS features)
+- AWS CLI configured (run `aws configure`)
+- (Optional) OpenAI API key
+- (Optional) LM Studio for local models
+- GPU recommended but not required (CPU supported)
 
-(Optional - skip if irrelevant) To enable Google Doc syncing, follow the [Google Cloud API](https://developers.google.com/workspace/drive/api/guides/about-sdk) instructions to get a ```credentials.json``` file using OAuth. Either place the file in the project directory, or place it somewhere else and update <mark>Path to credentials.json</mark> in the settings. The first time you sync, a browser window will open for you to authorize the application. Authentication is very finnicky and it might be necessary to delete the authorization token (```token.json```) and then reauthorize to get Drive syncing to work. You can do this with the "Reauthorize Drive" button.
-### 4. Running the application
-To start the application, run **SecondBrainFrontend.py** from the project folder. During the first run, it may take a while to download the models.
+### 2. Installation
+```bash
+# Clone repository
+git clone <repository-url>
+cd <repository-folder>
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 3. AWS Bedrock Setup
+```bash
+# Configure AWS credentials
+aws configure
+
+# Test Bedrock integration
+python test_bedrock_integration.py
+```
+
+Enable these models in AWS Bedrock Console:
+- Amazon Titan Embed Text v2
+- Amazon Titan Embed Image v1
+- Claude 3.5 Haiku or Sonnet
+
+### 4. Configuration
+Run the application and configure in Settings:
+- **Sync Directory**: Your knowledge base folder
+- **Use AWS Bedrock**: Enable for AWS embeddings
+- **LLM Backend**: Choose "AWS Bedrock", "OpenAI", or "LM Studio"
+- **AWS Region**: Select closest region (e.g., us-east-1)
+- **AWS Credentials**: Enter keys or leave empty to use AWS CLI
+
+### 5. Running the Application
+```bash
+python IntelliSearchFrontend.py
+```
+
+For Google Drive (optional):
+- Follow [Google Cloud API](https://developers.google.com/workspace/drive/api/guides/about-sdk) instructions
+- Add credentials.json to project folder
+- Authorize on first sync
 
 ---
 
 ## Usage Guide
 
-#### Syncing your files:  
-*Click the Sync Directory button to start embedding the files from your <mark>Sync Directory</mark>. Depending on the size of the directory, it can take a while (hours), but is necessary to enable search. This is faster with CUDA.
-The sync can be cancelled midway through by clicking the *Cancel Sync* button with no consequences. If restarted, the sync will continue where it left off.*
-#### Searching:  
-*Text results are based on relevant chunks of text from the embedding database.
-You can click on image results and file paths to open them directly, attach them, see their parent folder, or copy their path.*
-#### Using AI mode:  
-*Toggle the AI Mode checkbox to enable or disable **LLM augmented search**.
-When enabled, Second Brain loads the selected LLM from LM Studio or the OpenAI API. Then, searches are enhanced with AI-generated queries, results are filtered by the AI based on relevance, and a final "AI Insights" summary is always streamed in the results container. It is optional but recommended to use vision-enabled models, since it is needed to filter images and give insights on them. When disabled, the LLM is unloaded to save system resources, and the app performs a direct vector/lexical search with no query expansion, filtering, or summary. It is possible to toggle query expansion and filtering (go to Settings: LLM Query Expansion and LLM Filtering).*
-#### Attaching files:  
-*If you attach a text document (.pdf, .docx, etc.), the entire text will be added if it is below a certain size (see Settings: Max Attachment Size). If it is too large, it extracts several relevant chunks to provide focused context for the search.
-If you attach an image, you can send it to find visually similar images in your database and related documents.
-You can send an attachment without a message.*
-#### Saving Insights:  
-*If you find that Second Brain has produced a good insight, you can save it for future use. When you click the "Save Insight" button, found after the AI Insights section of a response, the query and response get saved to a .txt file. These text files will be embedded, which gives Second Brain a long-term memory of its own contributions. (You can re-read or delete entries by going to the saved_insights folder, in the Second Brain directory.)*
+### Syncing Files
+Click **Sync Directory** to embed files using AWS Bedrock or local models. Process runs incrementally - cancel and resume anytime. GPU acceleration available for faster processing.
+
+### Searching
+- Type query and press Enter
+- Results show text chunks and related images
+- Click results to open, attach, or view source
+- Hybrid search combines semantic and keyword matching
+
+### AI Mode
+Toggle **AI Mode** to enable:
+- AWS Bedrock Claude models for advanced reasoning
+- Query expansion for comprehensive results
+- AI-powered relevance filtering
+- Synthesized insights with source citations
+- Vision support for image understanding
+
+Configure in Settings:
+- LLM Query Expansion (0-10 queries)
+- LLM Filtering (enable/disable)
+- Choose backend (AWS Bedrock, OpenAI, LM Studio)
+
+### Attaching Files
+- Click attachment icon to add context
+- Documents: Full text if under size limit, relevant chunks otherwise
+- Images: Find similar images and related documents
+- Send attachments without messages for pure similarity search
+
+### Saving Insights
+Click **Save Insight** to store AI responses as embedded documents. Creates searchable memory of previous interactions stored in saved_insights folder.
 
 ---
 
-## Configuration Details  
-config.json
+## Configuration Details
 
-Most of these settings can be controlled using the Settings page, but it is also possible to open the actual file to change some of the more obscure settings, like `synthesize\_results\_prompt`, if desired.
+Settings can be modified through the UI Settings page or by editing config.json directly.
 
-| Parameter Name | Function | Range | Default |
-| ----- | ----- | ----- | ----- |
-| credentials\_path | Path to credentials.json which is used to authenticate Google Drive downloads. By default it will look in the same folder as SecondBrainFrontend.py | Any path | "credentials.json" |
-| target\_directory | Which directory to sync to. Embeds all valid files in the directory. | Any directory | "C:\\\\Users\\\\user\\\\My Drive" |
-| text\_model\_name | SentenceTransformers text embedding model name. "BAAI/bge-m3", "BAAI/bge-large-en-v1.5", and "BAAI/bge-small-en-v1.5" work well, with the small version using fewer system resources, and m3 using the most. Also, BAAI/bge-m3 is multilingual. If you change the text model name, you need to remake all of your embeddings with that model - every embedding model has its own collection of the same name. | Any valid name | "BAAI/bge-large-en-v1.5" |
-| image\_model\_name | SentenceTransformers image embedding model name. "clip-ViT-L-14", "clip-ViT-B-16", and "clip-ViT-B-32" work well, with the 32 version using fewer system resources, and L-14 using the most. If you change the image model name, you need to remake all of your embeddings with that model. However, you will not lose your old collection, should you wish to turn back. | Any valid name | "clip-ViT-B-16" |
-| embed\_use\_cuda | Turning this to false forces the embedding models to use CPU. If set to true, uses CUDA if possible. I recommend using CUDA for syncing, but CPU is more than enough for individual searches, which means you can allocate more VRAM for a local model if desired. | true or false | true |
-| batch\_size | How many text chunks/images are processed in parallel with the embedders. Embedding is faster with higher values, given enough compute. | 1-50 | 20 |
-| chunk\_size | Maximum size of text chunks created from the text splitter, in tokens; 200 and 0 chunk_overlap is shown in research to be very good. | 50-2000 | 200 |
-| chunk\_overlap | Used to preserve continuity when splitting text. | 0-200 | 0 |
-| max_seq_length | Maximum input size for the text embedding model, in tokens. Lower values are faster. Must be larger than chunk_size. | Depends on model, 250-8192 | 512 |
-| mmr\_lambda | Prioritize diversity or relevance in search results; 0 \= prioritize diversity only, 1 \= prioritize relevance only. | 0.0-1.0 | 0.5 |
-| mmr\_alpha | The MMR rerank uses a hybrid semantic-lexical diversity metric. An mmr\_alpha of 0.0 prioritizes lexical diversity, while 1.0 is for using only semantic diversity in choosing how to rerank. | 0.0-1.0 | 0.5 |
-| search\_multiplier | How many results to find for each query. | At least 1 | 5 |
-| ai\_mode | Whether to use AI to aid in searches. | true or false | true |
-| ai\_mode | Whether to show the top button bar. | true or false | true |
-| show\_buttons | Whether to show the button row at the top. Controlled by the button on the bottom left in the main screen. | true or false | true |
-| llm_filter_results | Filtering results is somewhat slow. This gives the option to turn that part of ai_mode on/off. | true or false | false |
-| llm\_backend | Choose which AI backend to use. OpenAI is slower and not local but has smarter models. | “LM Studio” or "OpenAI" | "LM Studio" |
-| lms\_model\_name | Can be any language model from LM Studio, but it must be already downloaded. Vision is preferred. | Any valid name | "unsloth/gemma-3-4b-it" |
-| openai_model_name | Can be any OpenAI text model. (Some OpenAI models, like gpt-5, require additional verification to use.) | Any OpenAI model | "gpt-5-mini" |
-| openai_api_key | When using OpenAI as a backend, an API key from [platform.openai.com](https://platform.openai.com/) is required. Using it costs money, so the account must have enough funds. If this field is left blank (""), the OpenAI client will look for an *environmental variable* called OPENAI_API_KEY, and use that. Otherwise, the client will use the string found here. | Any API key | "" |
-| max\_results | Sets the maximum for both text and image results. | 1-30 | 6 |
-| search\_prefix | Phrase prefixed to the start of text search queries; recommended with the text embedding models BAAI/bge-large-en-v1.5 and BAAI/bge-small-en-v1.5. Not needed for BAAI/bge-m3. Set to “” to disable. | \- | "Represent this sentence for searching relevant passages: " |
-| query\_multiplier | How many queries the AI is asked to make to augment the search, based on the user’s attachment and user prompt. Set to 0 to turn off the feature. | 0 or more | 5 |
-| max\_attachment\_size | Will try to add an entire attachment to an AI as context if it is below this size, measured in tokens. Decrease if the context window is small. If an attachment is larger than this size, only the most relevant chunks of the attachment will be added. | 256-8192 | 1024 |
-| n\_attachment\_chunks | How many relevant text chunks to extract from attachments. In addition to LLM context, these are used as additional queries for lexical and semantic search. | 1-10 | 3 |
-| system\_prompt | Special instructions for how the AI should do its job. Feel free to change the special instructions to anything. | Any string | "You are a personal search assistant, made to turn user prompts into accurate and relevant search results, using information from the user's database. Special instruction: Be concise and pragmatic. Use simple, structured analogies to illustrate relationships. Sound casually confident and lightly playful." |
-| generate\_queries\_prompt | Special instructions for how the AI should do its job. It's best not to change this, but you can. | Any string | "{system_prompt}\n\n{user_request}\n{attachment_context}\nBased on the user's prompt, generate {n} creative search queries that could retrieve relevant {content} to answer the user. These queries will go into a semantic search algorithm to retreive relevant {content} from the user's database. The queries should be broad enough to find a variety of related items. These queries will search a somewhat small and personal database (that is, the user's hard drive). Respond with a plain list with no supporting text or markdown.{reminder_suffix}" |
-| evaluate\_text\_relevance\_prompt | Special instructions for how the AI should do its job. It's best not to change this, but you can. | Any string | "{system_prompt}\n\n{attachment_context}\n{user_request}\nDocument excerpt to evaluate:\n\"{chunk}\"\n\nIs this excerpt worth keeping? Respond only with YES or NO.\n\nRelevance is the most important thing. Does the snippet connect to the user's request?\n\nIf the excerpt is gibberish, respond with NO.\n\n(Again: respond only with YES or NO.)" |
-| evaluate\_image\_relevance\_prompt | Special instructions for how the AI should do its job. It's best not to change this, but you can. | Any string | "{system_prompt}\n\n{attachment_context}\n{user_request}\nIs the provided image worth keeping? Respond only with YES or NO.\n\nRelevance is the most important thing. Does the photo connect to the user's request?\n\nIf the image is blank, corrupted, or unreadable, respond with NO.\n\nImage file path: {image_path}\n\nIf the user's query has an exact match within the file path, respond with YES.\n\n(Again: respond only with YES or NO.)" |
-| synthesize\_results\_prompt | Special instructions for how the AI should do its job. It's best not to change this, but you can. | Any string | "{system_prompt}\n\nIt is {date_time}.\n\n{user_request}\n{attachment_context}\n{database_results}\n**Your Task:**\nBased exclusively on the information provided above, write a concise and helpful response. Your primary goal is to synthesize the information to **guide the user towards what they want**.\n\n**Instructions:**\n- The text search results are **snippets** from larger documents and may be incomplete.\n- Do **not assume or guess** the author of a document unless the source text makes it absolutely clear.\n- The documents don't have timestamps; don't assume the age of a document unless the source text makes it absolutely clear.\n- Cite every piece of information you use from the search results with its source, like so: (source_name).\n- If the provided search results are not relevant to the user's request, state that you could not find any relevant information.\n- Use markdown formatting (e.g., bolding, bullet points) to make the response easy to read.\n- If there are images, make sure to consider them for your response." |
-| use\_drive | The main control for whether to use Drive or not. Disabling it will make the Reauthorize button disappear, as well as prevent the system from trying to embed .gdoc files or request authorization. | true or false | true |
+### AWS Bedrock Settings
+| Parameter | Description | Default |
+|----|----|----|
+| use_bedrock | Enable AWS Bedrock integration | false |
+| bedrock_region | AWS region for Bedrock | us-east-1 |
+| bedrock_text_model | Bedrock text embedding model | titan-embed-text-v2 |
+| bedrock_image_model | Bedrock image embedding model | titan-embed-image-v1 |
+| bedrock_llm_model | Bedrock LLM for AI mode | claude-3-5-haiku |
+| aws_access_key_id | AWS access key (or use AWS CLI) | "" |
+| aws_secret_access_key | AWS secret key (or use AWS CLI) | "" |
 
-NOTE: is_final_microsoft_store_product is a control that is at the top of `SecondBrainFrontend.py` - setting it to True disables all print messages, removes CUDA availability, and removes all reference and functionality to do with Google Drive. It's best to leave this as False.
+### Core Settings
+
+| Parameter | Description | Range | Default |
+|-----------|-------------|-------|---------|
+| target_directory | Knowledge base directory path | Any directory | "C:\\Users\\user\\Documents" |
+| text_model_name | Local text embedding model (when use_bedrock=false) | bge-small/large/m3 | "BAAI/bge-small-en-v1.5" |
+| image_model_name | Local image embedding model (when use_bedrock=false) | clip-ViT-B-32/B-16/L-14 | "clip-ViT-B-32" |
+| use_cuda | Enable GPU acceleration | true/false | true |
+| batch_size | Parallel embedding batch size | 1-64 | 16 |
+| chunk_size | Text chunk size in tokens | 100-2000 | 200 |
+| chunk_overlap | Token overlap between chunks | 0-200 | 0 |
+| mmr_lambda | Relevance (1.0) vs diversity (0.0) | 0.0-1.0 | 0.5 |
+| mmr_alpha | Semantic (1.0) vs lexical (0.0) | 0.0-1.0 | 0.5 |
+| search_multiplier | Results per query multiplier | 1-20 | 5 |
+| max_results | Maximum search results | 1-30 | 6 |
+| llm_backend | AI backend selection | "AWS Bedrock"/"OpenAI"/"LM Studio" | "LM Studio" |
+| llm_filter_results | Enable AI result filtering | true/false | false |
+| query_multiplier | AI query expansion count | 0-10 | 4 |
+| max_attachment_size | Max attachment tokens | 200-8000 | 1000 |
+| lms_model_name | LM Studio model name | Any model | "unsloth/gemma-3-4b-it" |
+| openai_model_name | OpenAI model name | Any model | "gpt-4.1" |
+| OPENAI_API_KEY | OpenAI API key | Any key | "" |
+| use_drive | Enable Google Drive sync | true/false | true |
+| credentials_path | Google Drive credentials path | Any path | "credentials.json" |
 
 ---
 
 ## Dependencies
 
-*You can install the Python dependencies with the following command:*
+Install all dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-```pip install requests pdfminer.six chromadb python-docx rank_bm25 flet numpy Pillow langchain_core transformers sentence-transformers scipy langchain-text-splitters openai lmstudio google-auth-oauthlib google-api-python-client torch keyring```
+Key packages:
+- **boto3** - AWS SDK for Bedrock integration
+- **chromadb** - Vector database
+- **sentence-transformers** - Local embedding models
+- **flet** - UI framework
+- **langchain** - Text processing
+- **torch** - Deep learning (GPU support)
+- **rank_bm25** - Lexical search
+- **openai** - OpenAI API integration
+- **lmstudio** - Local model integration
 
-   requests  
-   pdfminer.six  
-   chromadb  
-   python-docx  
-   rank_bm25  
-   flet  
-   numpy  
-   Pillow  
-   langchain_core  
-   transformers  
-   sentence-transformers  
-   scipy  
-   langchain-text-splitters  
-   openai  
-   lmstudio  
-   google-auth-oauthlib  
-   google-api-python-client  
-   torch (if using GPU, you need to download the version that works with your CUDA toolkit)  
-   keyring  
+## Cost Comparison
 
-## Hidden Variables
-These can be found in the code to change minor features.
-```IMG_THUMBNAIL, stop_words, jpeg_quality, min_len, low_compression_threshold, high_compression_threshold, temperature, openai_vision_keywords, image_preview_size```
+| Backend | Setup | Cost per 1000 queries | Privacy | Offline |
+|---------|-------|----------------------|---------|---------|
+| AWS Bedrock | AWS account | ~$10 | AWS VPC | No |
+| Local (LM Studio) | GPU recommended | Free | Fully private | Yes |
+| OpenAI | API key | ~$500 | Cloud | No |
+
+AWS Bedrock provides the best balance of cost, performance, and scalability for production use.
+
+## Resources
+
+- [AWS Bedrock Documentation](https://docs.aws.amazon.com/bedrock/)
+- [ChromaDB Documentation](https://docs.trychroma.com/)
+- [LangChain Documentation](https://python.langchain.com/)
+- [AWS Setup Guide](AWS_SETUP_GUIDE.md)
+- [AWS Credentials Guide](AWS_CREDENTIALS_GUIDE.md)
 
 ---
 
-## Further Reading / Sources  
-[https://lmstudio.ai/docs/python](https://lmstudio.ai/docs/python)
-
-[https://research.trychroma.com/evaluating-chunking](https://research.trychroma.com/evaluating-chunking)
-
-[https://github.com/ALucek/chunking-strategies/blob/main/chunking.ipynb](https://github.com/ALucek/chunking-strategies/blob/main/chunking.ipynb)
-
-[https://flet.dev/docs/](https://flet.dev/docs/)
-
-[https://huggingface.co/spaces/mteb/leaderboard](https://huggingface.co/spaces/mteb/leaderboard)  
+**IntelliSearch AI** - Enterprise-grade AI-powered knowledge management with AWS Bedrock  
